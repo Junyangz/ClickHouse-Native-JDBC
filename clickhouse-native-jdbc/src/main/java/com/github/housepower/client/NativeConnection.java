@@ -21,6 +21,7 @@ import com.github.housepower.exception.ExceptionUtil;
 import com.github.housepower.exception.NotImplementedException;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
+import com.github.housepower.misc.DateTimeUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.netty.ChannelHelper;
 import com.github.housepower.netty.ChannelState;
@@ -40,7 +41,6 @@ import java.time.Duration;
 import java.time.ZoneId;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -150,7 +150,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         checkOrRepairChannel();
         checkState(ChannelState.IDLE);
         QueryRequest request = new QueryRequest(
-                nextId(),
+                newQueryId(),
                 getClientCtx(channel),
                 QueryRequest.STAGE_COMPLETE,
                 false, // TODO support compress
@@ -182,7 +182,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
     public Future<QueryResult> query(String querySql, Map<SettingKey, Object> settings) {
         checkOrRepairChannel();
         QueryRequest request = new QueryRequest(
-                nextId(),
+                newQueryId(),
                 getClientCtx(channel),
                 QueryRequest.STAGE_COMPLETE,
                 false, // TODO support compress
@@ -337,9 +337,8 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
             LOG.debug("channel[{}] change state from [{}] to [{}]", channel.id(), from, target);
     }
 
-    static String nextId() {
-        // return "ClickHouse-Native-JDBC-" + System.nanoTime();
-        return UUID.randomUUID().toString();
+    static String newQueryId() {
+         return "Native-JDBC-" + DateTimeUtil.currentDateTimeNanoStr();
     }
 
     static NativeContext.ClientContext clientContext(Channel ch) {

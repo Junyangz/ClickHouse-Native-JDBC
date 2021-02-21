@@ -23,8 +23,12 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class DateTimeUtil {
+
+    public static final String DATE_TIME_NANO_PATTERN = "yyyyMMddHHmmssSSSSSSSSS";
+    public static final DateTimeFormatter DATE_TIME_NANO_FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_NANO_PATTERN);
 
     public static ZoneId chooseTimeZone(NativeContext.ServerContext serverContext) {
         return (boolean) serverContext.getConfigure().settings().getOrDefault(SettingKey.use_client_time_zone, false)
@@ -56,5 +60,9 @@ public class DateTimeUtil {
     public static Timestamp toTimestamp(final ZonedDateTime zdt, @Nullable final ZoneId tz) {
         ZonedDateTime _zdt = tz == null ? zdt : zdt.withZoneSameLocal(tz);
         return Timestamp.from(_zdt.toInstant());
+    }
+
+    public static String currentDateTimeNanoStr() {
+        return DATE_TIME_NANO_FORMATTER.format(LocalDateTime.now());
     }
 }
