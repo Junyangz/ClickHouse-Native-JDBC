@@ -65,12 +65,15 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
       .setPassword(password)
       .buildPartial
 
-    blockingStub.executeQuery(
+    val ex = blockingStub.executeQuery(
       QueryInfo.newBuilder(baseQueryInfo)
         .setQueryId(UUID.randomUUID().toString)
         .setQuery("select now()")
         .build()
-    )
+    ).getException
+
+    if (ex.getCode != 0)
+      throw new ClickHouseAnalysisException(s"Error[${ex.getCode}] ${ex.getDisplayText}")
   }
 
   override def name(): String = catalogName
