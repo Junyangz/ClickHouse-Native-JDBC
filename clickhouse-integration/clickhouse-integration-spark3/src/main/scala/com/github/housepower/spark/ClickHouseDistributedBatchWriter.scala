@@ -14,12 +14,20 @@
 
 package com.github.housepower.spark
 
-import org.apache.spark.sql.connector.write.{BatchWrite, LogicalWriteInfo, SupportsTruncate, WriteBuilder}
+import org.apache.spark.internal.Logging
+import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.connector.write.{DataWriter, WriterCommitMessage}
 
-class ClickHouseWriteBuilder(val info: LogicalWriteInfo
-                            ) extends WriteBuilder with SupportsTruncate {
+/**
+ * Directly write data to local tables behind the Distributed table
+ */
+class ClickHouseDistributedBatchWriter extends DataWriter[InternalRow] with Logging {
 
-  override def buildForBatch(): BatchWrite = super.buildForBatch()
+  override def write(record: InternalRow): Unit = ???
 
-  override def truncate(): WriteBuilder = ???
+  override def commit(): WriterCommitMessage = ???
+
+  override def abort(): Unit = ???
+
+  override def close(): Unit = ???
 }

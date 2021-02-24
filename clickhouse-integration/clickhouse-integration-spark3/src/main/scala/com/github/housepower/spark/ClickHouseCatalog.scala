@@ -20,7 +20,7 @@ import java.util.UUID
 import com.github.housepower.client.GrpcConnection
 import com.github.housepower.protocol.grpc.{ClickHouseGrpc, QueryInfo}
 import com.github.housepower.settings.ClickHouseConfig
-import org.apache.spark.sql.catalyst.analysis.{NoSuchDatabaseException, NoSuchNamespaceException}
+import org.apache.spark.sql.catalyst.analysis.{NoSuchDatabaseException, NoSuchNamespaceException, NoSuchTableException}
 import org.apache.spark.sql.connector.catalog._
 import org.apache.spark.sql.connector.expressions.Transform
 import org.apache.spark.sql.types.StructType
@@ -104,19 +104,18 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
     case _ => throw new NoSuchDatabaseException(namespace.mkString("."))
   }
 
-  override def loadTable(ident: Identifier): Table = ???
+  override def loadTable(ident: Identifier): ClickHouseTable = ???
 
   override def createTable(ident: Identifier,
                            schema: StructType,
                            partitions: Array[Transform],
-                           properties: util.Map[String, String]): Table = {
+                           properties: util.Map[String, String]): ClickHouseTable = {
     ???
   }
 
-  override def alterTable(ident: Identifier, changes: TableChange*): Table = ???
+  override def alterTable(ident: Identifier, changes: TableChange*): ClickHouseTable = ???
 
   override def dropTable(ident: Identifier): Boolean = (ident.namespace() match {
-    case Array() => Some(ident.name())
     case Array(database) => Some(s"$database.${ident.name()}")
     case _ => None
   }).exists { table =>
@@ -127,10 +126,24 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
         .setOutputFormat("JSONCompact")
         .build()
     )
-    result.getException == null
+    result.getException.getCode == 0
   }
 
-  override def renameTable(oldIdent: Identifier, newIdent: Identifier): Unit = ???
+  override def renameTable(oldIdent: Identifier, newIdent: Identifier): Unit =
+    ((oldIdent.namespace(), newIdent.namespace()) match {
+      case (Array(oldDb), Array(newDb)) => Some(s"$oldDb.${oldIdent.name()}", s"$newDb.${newIdent.name()}")
+      case _ => None
+    }).foreach { case (oldTable, newTable) =>
+      val result = blockingStub.executeQuery(
+        QueryInfo.newBuilder(baseQueryInfo)
+          .setQuery(s"rename table $oldTable to $newTable")
+          .setQueryId(UUID.randomUUID().toString)
+          .setOutputFormat("JSONCompact")
+          .build()
+      )
+      if (result.getException.getCode != 0)
+        throw new NoSuchTableException(result.getException.getDisplayText)
+    }
 
   override def defaultNamespace(): Array[String] = Array(currentDb)
 
