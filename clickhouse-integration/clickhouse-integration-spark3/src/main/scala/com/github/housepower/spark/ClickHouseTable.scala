@@ -24,8 +24,13 @@ import org.apache.spark.sql.connector.write.LogicalWriteInfo
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
+case class Shard()
+
 class ClickHouseTable(override val name: String,
-                      override val schema: StructType
+                      override val schema: StructType,
+                      engine: String,
+                      partition: Seq[String],
+                      shards: Seq[Shard]
                      ) extends Table with SupportsRead with SupportsWrite {
 
   override def capabilities(): util.Set[TableCapability] =
@@ -33,7 +38,14 @@ class ClickHouseTable(override val name: String,
 
   override def newScanBuilder(options: CaseInsensitiveStringMap): ClickHouseScanBuilder = ???
 
-  override def newWriteBuilder(info: LogicalWriteInfo): ClickHouseWriteBuilder = {
+  override def newWriteBuilder(info: LogicalWriteInfo): ClickHouseWriteBuilder = ???
+//  {
+//    engine match {
+//      case "Distribute" =>
+//
+//      case _ =>
+//
+//    }
+//  }
 
-  }
 }
