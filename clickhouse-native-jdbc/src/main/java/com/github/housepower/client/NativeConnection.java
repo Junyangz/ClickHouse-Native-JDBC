@@ -35,6 +35,7 @@ import com.github.housepower.stream.QueryResult;
 import io.netty.channel.Channel;
 
 import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.time.Duration;
@@ -179,7 +180,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         }
     }
 
-    public Future<QueryResult> query(String querySql, Map<SettingKey, Object> settings) {
+    public Future<QueryResult> query(String querySql, Map<SettingKey, Serializable> settings) {
         checkOrRepairChannel();
         QueryRequest request = new QueryRequest(
                 newQueryId(),
@@ -194,7 +195,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
                         recvResponse(RESPONSE_DATA, RESPONSE_END_OF_STREAM, Duration.ofMillis(300), false, true)));
     }
 
-    public QueryResult syncQuery(String querySql, Map<SettingKey, Object> settings) {
+    public QueryResult syncQuery(String querySql, Map<SettingKey, Serializable> settings) {
         try {
             return query(querySql, settings).get();
         } catch (Exception rethrow) {

@@ -19,6 +19,7 @@ import com.github.housepower.settings.SettingType;
 import com.github.housepower.settings.SettingKey;
 import io.netty.buffer.ByteBuf;
 
+import java.io.Serializable;
 import java.util.Map;
 
 public class QueryRequest implements Request {
@@ -39,10 +40,10 @@ public class QueryRequest implements Request {
     private final String queryString;
     private final boolean compression;
     private final NativeContext.ClientContext clientContext;
-    private final Map<SettingKey, Object> settings;
+    private final Map<SettingKey, Serializable> settings;
 
     public QueryRequest(String queryId, NativeContext.ClientContext clientContext, int stage, boolean compression, String queryString,
-                        Map<SettingKey, Object> settings) {
+                        Map<SettingKey, Serializable> settings) {
 
         this.stage = stage;
         this.queryId = queryId;
@@ -62,7 +63,7 @@ public class QueryRequest implements Request {
         writeUTF8Binary(buf, queryId);
         clientContext.encode(buf);
 
-        for (Map.Entry<SettingKey, Object> entry : settings.entrySet()) {
+        for (Map.Entry<SettingKey, Serializable> entry : settings.entrySet()) {
             writeUTF8Binary(buf, entry.getKey().name());
             @SuppressWarnings("rawtypes")
             SettingType type = entry.getKey().type();

@@ -17,9 +17,10 @@ package com.github.housepower.settings;
 import com.github.housepower.io.ByteBufHelper;
 import io.netty.buffer.ByteBuf;
 
+import java.io.Serializable;
 import java.time.Duration;
 
-public interface SettingType<T> extends ByteBufHelper {
+public interface SettingType<T extends Serializable> extends ByteBufHelper {
 
     Class<T> javaClass();
 

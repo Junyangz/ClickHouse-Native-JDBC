@@ -31,6 +31,7 @@ import com.github.housepower.settings.SettingKey;
 import com.github.housepower.stream.QueryResult;
 
 import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.sql.*;
 import java.time.Duration;
 import java.util.HashMap;
@@ -258,7 +259,7 @@ public class ClickHouseConnection implements SQLConnection {
         return ExceptionUtil.rethrowSQLException(() -> nativeConn.syncSampleBlock(insertQuery));
     }
 
-    public QueryResult sendQueryRequest(final String query, Map<SettingKey, Object> settings) throws SQLException {
+    public QueryResult sendQueryRequest(final String query, Map<SettingKey, Serializable> settings) throws SQLException {
         return ExceptionUtil.rethrowSQLException(() -> nativeConn.syncQuery(query, settings));
     }
 

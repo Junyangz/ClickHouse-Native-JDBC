@@ -17,13 +17,14 @@ package com.github.housepower.settings;
 import com.github.housepower.misc.StrUtil;
 import com.github.housepower.misc.Validate;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SettingKey {
+public class SettingKey implements Serializable {
     // key always is lower case
     private static final Map<String, SettingKey> DEFINED_SETTING_KEYS = new ConcurrentHashMap<>();
 
