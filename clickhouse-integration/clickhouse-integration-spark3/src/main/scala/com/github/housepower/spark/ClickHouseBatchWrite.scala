@@ -15,15 +15,23 @@
 package com.github.housepower.spark
 
 import com.github.housepower.client.GrpcConnection
-import org.apache.spark.sql.connector.write.{BatchWrite, DataWriterFactory, PhysicalWriteInfo, WriterCommitMessage}
+import org.apache.spark.sql.connector.write._
 
-class ClickHouseBatchWrite(val grpcConn: GrpcConnection) extends BatchWrite {
+class ClickHouseBatchWrite(val grpcConn: GrpcConnection,
+                           val logicalInfo: LogicalWriteInfo,
+                           database: String,
+                           table: String) extends BatchWrite {
 
   override def createBatchWriterFactory(info: PhysicalWriteInfo): DataWriterFactory = {
 
     new DataWriterFactory() {
       override def createWriter(partitionId: Int, taskId: Long): ClickHouseBatchWriter = {
-        ???
+        new ClickHouseBatchWriter(grpcConn,
+          logicalInfo.queryId(),
+          database,
+          table,
+          logicalInfo.schema()
+        )
       }
     }
   }

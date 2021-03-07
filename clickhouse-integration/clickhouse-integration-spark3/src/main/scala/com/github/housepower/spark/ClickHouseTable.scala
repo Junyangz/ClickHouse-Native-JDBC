@@ -43,7 +43,7 @@ class ClickHouseTable(ident: Identifier,
   override def newScanBuilder(options: CaseInsensitiveStringMap): ClickHouseScanBuilder = ???
 
   override def newWriteBuilder(info: LogicalWriteInfo): ClickHouseWriteBuilder = {
-    ???
+    new ClickHouseWriteBuilder(info, grpcConn, ident.namespace().head, ident.name())
   }
 
   // TODO cluster, shard, partition

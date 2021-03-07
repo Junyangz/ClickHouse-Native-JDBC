@@ -43,6 +43,13 @@ class ClickHouseCatalogITest extends AbstractITest with Logging {
         | settings.index_granularity = 8192
         | )
         |""".stripMargin)
+
+    spark.createDataFrame(Seq((1, 1L, "1"), (2, 2L, "2")))
+      .toDF("a", "b", "c")
+      .writeTo("clickhouse.default.spark_tbl")
+      .append
+
+    println()
   }
 
   @transient lazy implicit val spark: SparkSession = {

@@ -16,30 +16,53 @@ package com.github.housepower.spark
 
 import com.github.housepower.client.GrpcConnection
 import org.apache.spark.internal.Logging
+import org.apache.spark.sql.JsonFormatUtil
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.connector.write.{DataWriter, WriterCommitMessage}
 import org.apache.spark.sql.types.StructType
 
+import java.io.IOException
+import java.nio.charset.StandardCharsets
 import java.util
+import scala.collection.mutable
 
 class ClickHouseBatchWriter(val grpcConn: GrpcConnection,
                             val queryId: String,
                             val database: String,
-                            val tables: String,
+                            val table: String,
                             val schema: StructType,
                             val batchSize: Int = 1000
                            ) extends DataWriter[InternalRow] with Logging {
 
-  val buf: util.ArrayList[Array[Byte]] = new util.ArrayList[Array[Byte]](batchSize)
+  val ckSchema: util.Map[String, String] = ClickHouseSchemaUtil.toClickHouseSchema(schema)
+    .foldLeft(new util.LinkedHashMap[String, String]) { case (acc, (k, v)) =>
+      acc.put(k, v.name()); acc
+    }
+
+  val buf: mutable.MutableList[String] = new mutable.MutableList[String]
 
   override def write(record: InternalRow): Unit = {
-
-    //    grpcConn.syncInsert()
+    buf += JsonFormatUtil.row2Json(record, schema)
+    if (buf.size == batchSize)
+      flush()
   }
 
-  override def commit(): WriterCommitMessage = new WriterCommitMessage {}
+  override def commit(): WriterCommitMessage = {
+    if (buf.nonEmpty)
+      flush()
+    new WriterCommitMessage {}
+  }
 
   override def abort(): Unit = {}
 
   override def close(): Unit = {}
+
+  // TODO retry
+  def flush(): Unit = {
+    val result = grpcConn.syncInsert(database, table, ckSchema, buf.mkString.getBytes(StandardCharsets.UTF_8))
+    result.getException match {
+      case e if e.getCode != 0 => throw new IOException()
+      case _ => buf.clear
+    }
+  }
 }
