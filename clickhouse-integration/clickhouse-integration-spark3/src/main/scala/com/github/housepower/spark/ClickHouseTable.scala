@@ -14,38 +14,38 @@
 
 package com.github.housepower.spark
 
-import java.util
-
-import scala.collection.JavaConverters._
-
-import org.apache.spark.sql.connector.catalog.{SupportsRead, SupportsWrite, Table, TableCapability}
+import com.github.housepower.client.GrpcConnection
 import org.apache.spark.sql.connector.catalog.TableCapability._
+import org.apache.spark.sql.connector.catalog._
+import org.apache.spark.sql.connector.expressions.Transform
 import org.apache.spark.sql.connector.write.LogicalWriteInfo
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
+import java.util
+import scala.collection.JavaConverters._
+
 case class Shard()
 
-class ClickHouseTable(override val name: String,
+class ClickHouseTable(ident: Identifier,
                       override val schema: StructType,
-                      engine: String,
-                      partition: Seq[String],
-                      shards: Seq[Shard]
-                     ) extends Table with SupportsRead with SupportsWrite {
+                      override val properties: util.Map[String, String],
+                      grpcConn: GrpcConnection
+                     ) extends Table with SupportsRead with SupportsWrite with SupportsMetadataColumns {
+
+  override val name: String = ident.toString
 
   override def capabilities(): util.Set[TableCapability] =
     Set(BATCH_READ, BATCH_WRITE, TRUNCATE).asJava
 
+  override def partitioning(): Array[Transform] = super.partitioning()
+
   override def newScanBuilder(options: CaseInsensitiveStringMap): ClickHouseScanBuilder = ???
 
-  override def newWriteBuilder(info: LogicalWriteInfo): ClickHouseWriteBuilder = ???
-//  {
-//    engine match {
-//      case "Distribute" =>
-//
-//      case _ =>
-//
-//    }
-//  }
+  override def newWriteBuilder(info: LogicalWriteInfo): ClickHouseWriteBuilder = {
+    ???
+  }
 
+  // TODO cluster, shard, partition
+  override def metadataColumns(): Array[MetadataColumn] = Array()
 }

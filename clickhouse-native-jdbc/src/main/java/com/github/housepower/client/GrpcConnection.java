@@ -14,13 +14,23 @@
 
 package com.github.housepower.client;
 
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.misc.DateTimeUtil;
-import com.github.housepower.protocol.grpc.ClickHouseGrpc;
+import com.github.housepower.protocol.grpc.*;
 import com.github.housepower.settings.ClickHouseConfig;
+import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class GrpcConnection implements IConnection {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GrpcConnection.class);
 
     public static GrpcConnection create(ClickHouseConfig cfg) {
         GrpcConnection grpcConnection = new GrpcConnection(cfg);
@@ -35,6 +45,8 @@ public class GrpcConnection implements IConnection {
     private volatile String sessionId;
     private volatile ClickHouseConfig cfg;
 
+    private volatile QueryInfo baseQueryInfo;
+
     public GrpcConnection(ClickHouseConfig cfg) {
         this.cfg = cfg;
     }
@@ -44,6 +56,10 @@ public class GrpcConnection implements IConnection {
         this.blockingStub = ClickHouseGrpc.newBlockingStub(channel);
         this.futureStub = ClickHouseGrpc.newFutureStub(channel);
         this.sessionId = newSessionId();
+        this.baseQueryInfo = QueryInfo.newBuilder()
+                .setUserName(cfg.user())
+                .setPassword(cfg.password())
+                .buildPartial();
     }
 
     public String sessionId() {
@@ -66,6 +82,42 @@ public class GrpcConnection implements IConnection {
 
     public ClickHouseGrpc.ClickHouseFutureStub futureStub() {
         return this.futureStub;
+    }
+
+    public Result syncQuery(String sql) {
+        LOG.info("Execute ClickHouse SQL:\n{}", sql);
+        QueryInfo queryInfo = QueryInfo.newBuilder(baseQueryInfo)
+                .setQuery(sql)
+                .setQueryId(newQueryId())
+                .setSessionId(sessionId)
+                .setOutputFormat("JSON")
+                .build();
+        return blockingStub.executeQuery(queryInfo);
+    }
+
+    public Result syncInsert(String database, String table, Map<String, String> schema, byte[] rows) {
+
+        List<NameAndType> columns = schema.entrySet().stream().map(entry ->
+                NameAndType.newBuilder()
+                        .setName(entry.getKey())
+                        .setType(entry.getValue())
+                        .build()
+        ).collect(Collectors.toList());
+
+        ExternalTable data = ExternalTable.newBuilder()
+                .addAllColumns(columns)
+                .setDataBytes(ByteString.copyFrom(rows))
+                .setFormat("JSONEachRow")
+                .build();
+
+        QueryInfo queryInfo = QueryInfo.newBuilder(baseQueryInfo)
+                .setQuery(String.format(Locale.ROOT, "INSERT INTO `%s`.`%s` FORMAT JSONEachRow", database, table))
+                .setQueryId(newQueryId())
+                .addExternalTables(data)
+                .setSessionId(sessionId)
+                .setOutputFormat("JSON")
+                .build();
+        return blockingStub.executeQuery(queryInfo);
     }
 
     @Override

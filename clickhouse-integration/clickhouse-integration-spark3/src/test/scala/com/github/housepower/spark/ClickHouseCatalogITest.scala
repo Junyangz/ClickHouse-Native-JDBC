@@ -17,7 +17,7 @@ package com.github.housepower.spark
 import com.github.housepower.jdbc.AbstractITest
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.{Disabled, Test}
 
 class ClickHouseCatalogITest extends AbstractITest with Logging {
 
@@ -28,6 +28,21 @@ class ClickHouseCatalogITest extends AbstractITest with Logging {
     spark.sql("show databases").show(false)
     spark.sql("use system").collect
     spark.sql("show tables").show(false)
+
+    spark.sql(
+      """
+        | CREATE TABLE default.spark_tbl (
+        |   a INT NOT NULL,
+        |   b LONG NOT NULL,
+        |   c STRING
+        | ) USING ClickHouse
+        | PARTITIONED BY (toDate(a))
+        | TBLPROPERTIES (
+        | engine = 'MergeTree()',
+        | order_by = '(b)',
+        | settings.index_granularity = 8192
+        | )
+        |""".stripMargin)
   }
 
   @transient lazy implicit val spark: SparkSession = {

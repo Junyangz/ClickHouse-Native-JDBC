@@ -16,7 +16,7 @@ package org.apache.spark.sql
 
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 
-class ClickHouseAnalysisException
+case class ClickHouseAnalysisException
 (
   override val message: String,
   override val line: Option[Int] = None,

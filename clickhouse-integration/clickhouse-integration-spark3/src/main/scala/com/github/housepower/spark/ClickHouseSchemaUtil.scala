@@ -22,7 +22,7 @@ import org.apache.spark.sql.types.{ByteType, IntegerType, LongType, ShortType, S
 
 import java.nio.charset.StandardCharsets
 
-class ClickHouseSchemaUtil {
+object ClickHouseSchemaUtil {
 
   def fromClickHouseSchema(chSchema: Seq[(String, IDataType[_, _])]): StructType = {
     val structFields = chSchema
@@ -52,7 +52,7 @@ class ClickHouseSchemaUtil {
           case IntegerType => new DataTypeInt32
           case LongType => new DataTypeInt64
           case StringType => new DataTypeString(StandardCharsets.UTF_8)
-          case _ => throw new ClickHouseAnalysisException(s"Unsupported field: ${field.name}[${field.dataType}]")
+          case _ => throw ClickHouseAnalysisException(s"Unsupported field: ${field.name}[${field.dataType}]")
         }
         (field.name, if (field.nullable) nullable(chType) else chType)
       }

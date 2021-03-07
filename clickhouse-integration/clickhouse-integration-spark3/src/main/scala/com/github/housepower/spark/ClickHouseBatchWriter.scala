@@ -14,17 +14,32 @@
 
 package com.github.housepower.spark
 
+import com.github.housepower.client.GrpcConnection
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.connector.write.{DataWriter, WriterCommitMessage}
+import org.apache.spark.sql.types.StructType
 
-class ClickHouseBatchWriter extends DataWriter[InternalRow] with Logging {
+import java.util
 
-  override def write(record: InternalRow): Unit = ???
+class ClickHouseBatchWriter(val grpcConn: GrpcConnection,
+                            val queryId: String,
+                            val database: String,
+                            val tables: String,
+                            val schema: StructType,
+                            val batchSize: Int = 1000
+                           ) extends DataWriter[InternalRow] with Logging {
 
-  override def commit(): WriterCommitMessage = ???
+  val buf: util.ArrayList[Array[Byte]] = new util.ArrayList[Array[Byte]](batchSize)
 
-  override def abort(): Unit = ???
+  override def write(record: InternalRow): Unit = {
 
-  override def close(): Unit = ???
+    //    grpcConn.syncInsert()
+  }
+
+  override def commit(): WriterCommitMessage = new WriterCommitMessage {}
+
+  override def abort(): Unit = {}
+
+  override def close(): Unit = {}
 }

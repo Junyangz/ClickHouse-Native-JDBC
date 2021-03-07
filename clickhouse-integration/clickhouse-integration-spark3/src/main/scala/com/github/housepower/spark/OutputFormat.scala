@@ -15,14 +15,14 @@
 package com.github.housepower.spark
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 
 trait Output
 
 case class MetaItem(name: String, @JsonProperty("type") typ: String)
 
-case class JSONCompactOutput(meta: Seq[MetaItem],
-                             data: Seq[ArrayNode],
-                             rows: Long,
-                             @JsonProperty("rows_before_limit_at_least") rowsBeforeLimitAtLeast: Long
-                            ) extends Output
+case class JSONOutput(meta: Seq[MetaItem],
+                      data: Seq[ObjectNode],
+                      rows: Long,
+                      @JsonProperty("rows_before_limit_at_least") rowsBeforeLimitAtLeast: Long
+                     ) extends Output

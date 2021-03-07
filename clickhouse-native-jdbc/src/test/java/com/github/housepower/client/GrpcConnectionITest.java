@@ -50,14 +50,14 @@ public class GrpcConnectionITest extends AbstractITest {
     }
 
     @Test
-    public void test() throws InterruptedException {
-        QueryInfo queryInfo = QueryInfo.newBuilder(baseQueryInfo)
-                .setSessionId(grpcConnection.sessionId())
-                .setQuery("select now()")
-                .setQueryId("test_query_001")
-                .build();
-        Result result = blockingStub.executeQuery(queryInfo);
+    public void testQuery() {
+        Result result = grpcConnection.syncQuery("select now()");
         LOG.info("execute: select now()");
         LOG.info(result.toString());
+    }
+
+    @Test
+    public void testInsert() {
+
     }
 }

@@ -14,12 +14,16 @@
 
 package com.github.housepower.spark
 
-import org.apache.spark.sql.connector.write.{BatchWrite, LogicalWriteInfo, SupportsTruncate, WriteBuilder}
+import com.github.housepower.client.GrpcConnection
+import org.apache.spark.sql.connector.write.{LogicalWriteInfo, SupportsTruncate, WriteBuilder}
 
-class ClickHouseWriteBuilder(val info: LogicalWriteInfo
+class ClickHouseWriteBuilder(val info: LogicalWriteInfo,
+                             val grpcConn: GrpcConnection
                             ) extends WriteBuilder with SupportsTruncate {
 
-  override def buildForBatch(): BatchWrite = super.buildForBatch()
+  override def buildForBatch(): ClickHouseBatchWrite = {
+    ???
+  }
 
   override def truncate(): WriteBuilder = ???
 }

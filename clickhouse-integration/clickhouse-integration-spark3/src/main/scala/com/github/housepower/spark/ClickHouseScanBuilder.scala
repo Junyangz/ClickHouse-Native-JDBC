@@ -14,20 +14,28 @@
 
 package com.github.housepower.spark
 
-import org.apache.spark.sql.connector.read.{Scan, ScanBuilder, SupportsPushDownFilters, SupportsPushDownRequiredColumns}
+import com.github.housepower.protocol.grpc.ClickHouseGrpc
+import org.apache.spark.sql.connector.catalog.Identifier
+import org.apache.spark.sql.connector.read.{ScanBuilder, SupportsPushDownFilters, SupportsPushDownRequiredColumns}
 import org.apache.spark.sql.sources.Filter
 import org.apache.spark.sql.types.StructType
 
-class ClickHouseScanBuilder
-  extends ScanBuilder
-    with SupportsPushDownFilters
-    with SupportsPushDownRequiredColumns {
+import java.util
 
-  override def build(): Scan = ???
+class ClickHouseScanBuilder(ident: Identifier,
+                            tableSchema: StructType,
+                            properties: util.Map[String, String],
+                            blockingStub: ClickHouseGrpc.ClickHouseBlockingStub) extends ScanBuilder
+  with SupportsPushDownFilters
+  with SupportsPushDownRequiredColumns {
 
-  override def pushFilters(filters: Array[Filter]): Array[Filter] = ???
+  val readSchema: StructType = tableSchema
 
-  override def pushedFilters(): Array[Filter] = ???
+  override def build(): ClickHouseBatchScan = ???
 
-  override def pruneColumns(requiredSchema: StructType): Unit = ???
+  override def pushFilters(filters: Array[Filter]): Array[Filter] = Array()
+
+  override def pushedFilters(): Array[Filter] = Array()
+
+  override def pruneColumns(requiredSchema: StructType): Unit = {}
 }
