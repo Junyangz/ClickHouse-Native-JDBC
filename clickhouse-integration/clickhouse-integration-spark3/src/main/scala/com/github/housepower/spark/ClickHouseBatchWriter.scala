@@ -20,19 +20,23 @@ import org.apache.spark.sql.JsonFormatUtil
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.connector.write.{DataWriter, WriterCommitMessage}
 import org.apache.spark.sql.types.StructType
-
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util
+
 import scala.collection.mutable
 
-class ClickHouseBatchWriter(val grpcConn: GrpcConnection,
+import com.github.housepower.settings.ClickHouseConfig
+
+class ClickHouseBatchWriter(val cfg: ClickHouseConfig,
                             val queryId: String,
                             val database: String,
                             val table: String,
                             val schema: StructType,
                             val batchSize: Int = 1000
                            ) extends DataWriter[InternalRow] with Logging {
+
+  @transient val grpcConn: GrpcConnection = GrpcConnection.create(cfg)
 
   val ckSchema: util.Map[String, String] = ClickHouseSchemaUtil.toClickHouseSchema(schema)
     .foldLeft(new util.LinkedHashMap[String, String]) { case (acc, (k, v)) =>
@@ -61,7 +65,7 @@ class ClickHouseBatchWriter(val grpcConn: GrpcConnection,
   def flush(): Unit = {
     val result = grpcConn.syncInsert(database, table, ckSchema, buf.mkString.getBytes(StandardCharsets.UTF_8))
     result.getException match {
-      case e if e.getCode != 0 => throw new IOException()
+      case e if e.getCode != 0 => throw new IOException(e.getDisplayText)
       case _ => buf.clear
     }
   }

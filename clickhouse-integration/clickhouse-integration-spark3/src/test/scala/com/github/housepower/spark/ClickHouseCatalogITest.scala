@@ -49,7 +49,7 @@ class ClickHouseCatalogITest extends AbstractITest with Logging {
       .writeTo("clickhouse.default.spark_tbl")
       .append
 
-    println()
+    spark.sql(""" DESC default.spark_tbl """).show(false)
   }
 
   @transient lazy implicit val spark: SparkSession = {

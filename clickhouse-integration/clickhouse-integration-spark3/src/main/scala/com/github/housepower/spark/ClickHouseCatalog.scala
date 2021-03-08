@@ -14,6 +14,11 @@
 
 package com.github.housepower.spark
 
+import java.time.ZoneId
+import java.util
+
+import scala.collection.JavaConverters._
+
 import com.github.housepower.client.GrpcConnection
 import com.github.housepower.client.NativeContext.ServerContext
 import com.github.housepower.data.DataTypeFactory
@@ -26,15 +31,13 @@ import org.apache.spark.sql.connector.expressions.Transform
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
-import java.time.ZoneId
-import java.util
-import scala.collection.JavaConverters._
-
 class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Logging {
 
   private var catalogName: String = _
 
   private var currentDb: String = _
+
+  private var cfg: ClickHouseConfig = _
 
   private var grpcConn: GrpcConnection = _
 
@@ -47,7 +50,7 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
     val user = options.getOrDefault("user", "default")
     val password = options.getOrDefault("password", "")
     this.currentDb = options.getOrDefault("database", "default")
-    val cfg = ClickHouseConfig.Builder.builder()
+    this.cfg = ClickHouseConfig.Builder.builder()
       .host(host)
       .port(port)
       .user(user)
@@ -157,7 +160,7 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
       val ckType = DataTypeFactory.get(row.get("type").asText, mockServerCtx)
       (fieldName, ckType)
     })
-    new ClickHouseTable(ident, schema, props, grpcConn)
+    new ClickHouseTable(ident, schema, props, cfg)
   }
 
   /**

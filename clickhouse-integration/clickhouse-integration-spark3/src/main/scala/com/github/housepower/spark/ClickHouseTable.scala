@@ -14,24 +14,24 @@
 
 package com.github.housepower.spark
 
-import com.github.housepower.client.GrpcConnection
-import org.apache.spark.sql.connector.catalog.TableCapability._
+import java.util
+
+import scala.collection.JavaConverters._
+
+import com.github.housepower.settings.ClickHouseConfig
 import org.apache.spark.sql.connector.catalog._
+import org.apache.spark.sql.connector.catalog.TableCapability._
 import org.apache.spark.sql.connector.expressions.Transform
 import org.apache.spark.sql.connector.write.LogicalWriteInfo
 import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.util.CaseInsensitiveStringMap
-
-import java.util
-import scala.collection.JavaConverters._
 
 case class Shard()
 
 class ClickHouseTable(ident: Identifier,
                       override val schema: StructType,
                       override val properties: util.Map[String, String],
-                      grpcConn: GrpcConnection
-                     ) extends Table with SupportsRead with SupportsWrite with SupportsMetadataColumns {
+                      cfg: ClickHouseConfig
+                     ) extends Table with SupportsWrite with SupportsMetadataColumns {
 
   override val name: String = ident.toString
 
@@ -40,10 +40,8 @@ class ClickHouseTable(ident: Identifier,
 
   override def partitioning(): Array[Transform] = super.partitioning()
 
-  override def newScanBuilder(options: CaseInsensitiveStringMap): ClickHouseScanBuilder = ???
-
   override def newWriteBuilder(info: LogicalWriteInfo): ClickHouseWriteBuilder = {
-    new ClickHouseWriteBuilder(info, grpcConn, ident.namespace().head, ident.name())
+    new ClickHouseWriteBuilder(info, cfg, ident.namespace().head, ident.name())
   }
 
   // TODO cluster, shard, partition

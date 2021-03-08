@@ -13,7 +13,8 @@ object JsonFormatUtil {
     val line = new StringWriter()
     val gen = new JacksonGenerator(schema, line, new JSONOptions(Map.empty[String, String], ZoneId.systemDefault().getId))
     gen.write(row)
-    gen.writeLineEnding()
+    gen.writeLineEnding
+    gen.flush
     line.toString
   }
 }

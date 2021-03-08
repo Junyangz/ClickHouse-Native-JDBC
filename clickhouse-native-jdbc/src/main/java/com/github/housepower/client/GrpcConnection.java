@@ -23,10 +23,10 @@ import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class GrpcConnection implements IConnection {
@@ -89,8 +89,8 @@ public class GrpcConnection implements IConnection {
         LOG.info("Execute ClickHouse SQL:\n{}", sql);
         QueryInfo queryInfo = QueryInfo.newBuilder(baseQueryInfo)
                 .setQuery(sql)
-                .setQueryId(newQueryId())
-                .setSessionId(sessionId)
+                .setQueryId(UUID.randomUUID().toString())
+                //.setSessionId(sessionId)
                 .setOutputFormat("JSON")
                 .build();
         return blockingStub.executeQuery(queryInfo);
@@ -113,9 +113,10 @@ public class GrpcConnection implements IConnection {
 
         QueryInfo queryInfo = QueryInfo.newBuilder(baseQueryInfo)
                 .setQuery(String.format(Locale.ROOT, "INSERT INTO `%s`.`%s` FORMAT JSONEachRow", database, table))
-                .setQueryId(newQueryId())
-                .addExternalTables(data)
-                .setSessionId(sessionId)
+                .setQueryId(UUID.randomUUID().toString())
+                //.addExternalTables(data)
+                .setInputDataBytes(ByteString.copyFrom(rows))
+                //.setSessionId(sessionId)
                 .setOutputFormat("JSON")
                 .build();
         return blockingStub.executeQuery(queryInfo);
