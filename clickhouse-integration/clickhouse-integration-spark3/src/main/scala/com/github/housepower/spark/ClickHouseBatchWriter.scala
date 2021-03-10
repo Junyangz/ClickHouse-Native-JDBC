@@ -63,7 +63,8 @@ class ClickHouseBatchWriter(val cfg: ClickHouseConfig,
 
   // TODO retry
   def flush(): Unit = {
-    val result = grpcConn.syncInsert(database, table, ckSchema, buf.mkString.getBytes(StandardCharsets.UTF_8))
+    val result = grpcConn.syncInsert(database, table, "JSONEachRow",
+      buf.mkString.getBytes(StandardCharsets.UTF_8))
     result.getException match {
       case e if e.getCode != 0 => throw new IOException(e.getDisplayText)
       case _ => buf.clear

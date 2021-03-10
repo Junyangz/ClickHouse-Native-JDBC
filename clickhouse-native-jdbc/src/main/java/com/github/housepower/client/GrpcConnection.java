@@ -17,17 +17,16 @@ package com.github.housepower.client;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.misc.DateTimeUtil;
-import com.github.housepower.protocol.grpc.*;
+import com.github.housepower.protocol.grpc.ClickHouseGrpc;
+import com.github.housepower.protocol.grpc.QueryInfo;
+import com.github.housepower.protocol.grpc.Result;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class GrpcConnection implements IConnection {
 
@@ -90,33 +89,20 @@ public class GrpcConnection implements IConnection {
         QueryInfo queryInfo = QueryInfo.newBuilder(baseQueryInfo)
                 .setQuery(sql)
                 .setQueryId(UUID.randomUUID().toString())
-                //.setSessionId(sessionId)
                 .setOutputFormat("JSON")
                 .build();
         return blockingStub.executeQuery(queryInfo);
     }
 
-    public Result syncInsert(String database, String table, Map<String, String> schema, byte[] rows) {
-
-        List<NameAndType> columns = schema.entrySet().stream().map(entry ->
-                NameAndType.newBuilder()
-                        .setName(entry.getKey())
-                        .setType(entry.getValue())
-                        .build()
-        ).collect(Collectors.toList());
-
-        ExternalTable data = ExternalTable.newBuilder()
-                .addAllColumns(columns)
-                .setDataBytes(ByteString.copyFrom(rows))
-                .setFormat("JSONEachRow")
-                .build();
-
+    public Result syncInsert(String database, String table,
+                             String inputFormat,
+                             byte[] data) {
         QueryInfo queryInfo = QueryInfo.newBuilder(baseQueryInfo)
-                .setQuery(String.format(Locale.ROOT, "INSERT INTO `%s`.`%s` FORMAT JSONEachRow", database, table))
+                .setQuery(String.format(Locale.ROOT,
+                        "INSERT INTO `%s`.`%s` FORMAT %s",
+                        database, table, inputFormat))
                 .setQueryId(UUID.randomUUID().toString())
-                //.addExternalTables(data)
-                .setInputDataBytes(ByteString.copyFrom(rows))
-                //.setSessionId(sessionId)
+                .setInputDataBytes(ByteString.copyFrom(data))
                 .setOutputFormat("JSON")
                 .build();
         return blockingStub.executeQuery(queryInfo);

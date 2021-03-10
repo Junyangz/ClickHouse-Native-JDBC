@@ -26,7 +26,7 @@ import com.github.housepower.misc.Validate;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.SettingKey;
 import com.github.housepower.stream.QueryResult;
-import com.github.housepower.stream.ValuesInputFormat;
+import com.github.housepower.stream.ValuesNativeInputFormat;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -83,7 +83,7 @@ public class ClickHouseStatement implements SQLStatement {
                 String insertQuery = query.substring(0, matcher.end() - 1);
                 block = connection.getSampleBlock(insertQuery);
                 block.initWriteBuffer();
-                new ValuesInputFormat(matcher.end() - 1, query).fillBlock(block);
+                new ValuesNativeInputFormat(matcher.end() - 1, query).fill(block);
                 updateCount = connection.sendInsertRequest(block);
                 return updateCount;
             }

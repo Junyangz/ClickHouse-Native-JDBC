@@ -21,6 +21,7 @@ import com.github.housepower.data.IDataType;
 import com.github.housepower.data.type.*;
 import com.github.housepower.data.type.complex.*;
 import com.github.housepower.exception.ClickHouseSQLException;
+import com.github.housepower.exception.ExceptionUtil;
 import com.github.housepower.jdbc.ClickHouseArray;
 import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.ClickHouseStruct;
@@ -28,7 +29,7 @@ import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.misc.DateTimeUtil;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.stream.ValuesWithParametersInputFormat;
+import com.github.housepower.stream.ValuesWithParametersNativeInputFormat;
 import io.netty.util.AsciiString;
 
 import java.math.BigDecimal;
@@ -177,10 +178,12 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         if (this.blockInit) {
             return;
         }
-        this.block = connection.getSampleBlock(insertQuery);
-        this.block.initWriteBuffer();
-        this.blockInit = true;
-        new ValuesWithParametersInputFormat(posOfData, fullQuery).fillBlock(block);
+        ExceptionUtil.rethrowSQLException(() -> {
+            this.block = connection.getSampleBlock(insertQuery);
+            this.block.initWriteBuffer();
+            this.blockInit = true;
+            new ValuesWithParametersNativeInputFormat(posOfData, fullQuery).fill(block);
+        });
     }
 
     private void addParameters() throws SQLException {
