@@ -15,6 +15,7 @@
 package com.github.housepower.io;
 
 import com.github.housepower.misc.Switcher;
+import com.github.housepower.settings.ClickHouseDefines;
 import io.airlift.compress.Compressor;
 
 import javax.annotation.Nullable;
@@ -29,11 +30,10 @@ public class SmartRichWriter implements RichWriter, SupportCompress {
         this.enableCompress = enableCompress;
         RichWriter compressWriter = null;
         if (enableCompress) {
-            compressWriter = new CompressByteBufRichWriter(writer, compressor);
+            compressWriter = new CompressByteBufRichWriter(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES, writer, compressor);
         }
         switcher = new Switcher<>(compressWriter, writer);
     }
-
 
     @Override
     public void writeBoolean(boolean b) {

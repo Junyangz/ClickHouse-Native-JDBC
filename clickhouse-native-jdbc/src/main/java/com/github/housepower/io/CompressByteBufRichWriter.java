@@ -14,9 +14,26 @@
 
 package com.github.housepower.io;
 
+import io.airlift.compress.Compressor;
+import io.netty.buffer.ByteBuf;
+
 import java.nio.charset.Charset;
 
 public class CompressByteBufRichWriter implements RichWriter, ByteBufHelper, CodecHelper {
+
+    private final int capacity;
+    private final ByteBuf output;
+    private final Compressor compressor;
+
+    public CompressByteBufRichWriter(int capacity, ByteBufRichWriter writer, Compressor compressor) {
+        this.capacity = capacity;
+        this.output = writer.internalByteBuf();
+        this.compressor = compressor;
+    }
+
+    private void maybeCompress() {
+
+    }
 
     @Override
     public void writeBoolean(boolean b) {

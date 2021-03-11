@@ -14,72 +14,84 @@
 
 package com.github.housepower.io;
 
+import io.netty.buffer.ByteBuf;
+
 import java.nio.charset.Charset;
 
-public class ByteBufRichWriter implements RichWriter {
+public class ByteBufRichWriter implements RichWriter, ByteBufHelper, CodecHelper {
 
-    @Override
-    public void writeVarInt(long x) {
+    private final ByteBuf buf;
 
+    public ByteBufRichWriter(ByteBuf buf) {
+        this.buf = buf;
+    }
+
+    public ByteBuf internalByteBuf() {
+        return this.buf;
     }
 
     @Override
-    public void writeByte(byte x) {
-
+    public void writeBoolean(boolean b) {
+        buf.writeBoolean(b);
     }
 
     @Override
-    public void writeBoolean(boolean x) {
-
+    public void writeByte(byte b) {
+        buf.writeByte(b);
     }
 
     @Override
-    public void writeShortLE(short i) {
-
+    public void writeShortLE(short s) {
+        buf.writeShortLE(s);
     }
 
     @Override
     public void writeIntLE(int i) {
-
+        buf.writeIntLE(i);
     }
 
     @Override
-    public void writeLongLE(long i) {
+    public void writeLongLE(long l) {
+        buf.writeLongLE(l);
+    }
 
+    @Override
+    public void writeVarInt(long v) {
+        writeVarInt(buf, v);
+    }
+
+    @Override
+    public void writeFloatLE(float f) {
+        buf.writeFloatLE(f);
+    }
+
+    @Override
+    public void writeDoubleLE(double d) {
+        buf.writeDoubleLE(d);
     }
 
     @Override
     public void writeUTF8Binary(String utf8) {
-
+        writeUTF8Binary(buf, utf8);
     }
 
     @Override
     public void writeStringBinary(String data, Charset charset) {
-
+        writeCharSeqBinary(buf, data, charset);
     }
 
     @Override
-    public void writeBytesBinary(byte[] bs) {
-
-    }
-
-    @Override
-    public void flush(boolean force) {
-
-    }
-
-    @Override
-    public void writeFloatLE(float datum) {
-
-    }
-
-    @Override
-    public void writeDoubleLE(double datum) {
-
+    public void writeBytesBinary(byte[] bytes) {
+        writeBinary(buf, bytes);
     }
 
     @Override
     public void writeBytes(byte[] bytes) {
+        buf.writeBytes(bytes);
+    }
+
+    @Override
+    public void flush(boolean force) {
 
     }
 }

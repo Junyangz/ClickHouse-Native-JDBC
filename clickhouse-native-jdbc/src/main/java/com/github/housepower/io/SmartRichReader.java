@@ -25,7 +25,7 @@ public class SmartRichReader implements RichReader, SupportCompress {
         this.enableCompress = enableCompress;
         RichReader compressedReader = null;
         if (enableCompress) {
-            compressedReader = new DecompressByteBufRichReader(reader.internalByteBuf());
+            compressedReader = new DecompressByteBufRichReader(reader);
         }
         switcher = new Switcher<>(compressedReader, reader);
     }

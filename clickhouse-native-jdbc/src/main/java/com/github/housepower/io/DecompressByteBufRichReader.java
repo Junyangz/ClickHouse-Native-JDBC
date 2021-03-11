@@ -34,9 +34,9 @@ public class DecompressByteBufRichReader implements RichReader, ByteBufHelper, C
     private final Decompressor lz4Decompressor = new Lz4Decompressor();
     private final Decompressor zstdDecompressor = new ZstdDecompressor();
 
-    public DecompressByteBufRichReader(ByteBuf buf) {
-        this.compressedBuf = buf;
-        this.decompressedBuf = buf.alloc().buffer(); // TODO set a init size
+    public DecompressByteBufRichReader(ByteBufRichReader reader) {
+        this.compressedBuf = reader.internalByteBuf();
+        this.decompressedBuf = compressedBuf.alloc().buffer(); // TODO set a init size
     }
 
     @Override
