@@ -12,32 +12,11 @@
  * limitations under the License.
  */
 
-package com.github.housepower.misc;
+package com.github.housepower.io;
 
-public class Switcher<T> {
-    private final T left;
-    private final T right;
+public interface SupportCompress {
 
-    private boolean isRight = true;
+    void maybeEnableCompressed();
 
-    public Switcher(T left, T right) {
-        this.left = left;
-        this.right = right;
-    }
-
-    public void select(boolean isRight) {
-        this.isRight = isRight;
-    }
-
-    public T get() {
-        return this.isRight ? right : left;
-    }
-
-    public boolean isLeft() {
-        return !isRight;
-    }
-
-    public boolean isRight() {
-        return isRight;
-    }
+    void maybeDisableCompressed();
 }

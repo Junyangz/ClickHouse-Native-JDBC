@@ -19,7 +19,7 @@ import com.github.housepower.misc.Switcher;
 import java.nio.charset.StandardCharsets;
 
 @Deprecated
-public class LegacyRichReader implements RichReader {
+public class LegacyRichReader implements RichReader, SupportCompress {
 
     private final Switcher<BinaryReader> switcher;
     private final boolean enableCompress;
@@ -48,7 +48,7 @@ public class LegacyRichReader implements RichReader {
     }
 
     @SuppressWarnings("PointlessBitwiseExpression")
-    public short readShort() {
+    public short readShortLE() {
         // @formatter:off
         return (short) (((switcher.get().readByte() & 0xFF) << 0)
                       + ((switcher.get().readByte() & 0xFF) << 8));
@@ -56,7 +56,7 @@ public class LegacyRichReader implements RichReader {
     }
 
     @SuppressWarnings("PointlessBitwiseExpression")
-    public int readInt() {
+    public int readIntLE() {
         // @formatter:off
         return ((switcher.get().readByte() & 0xFF) << 0)
              + ((switcher.get().readByte() & 0xFF) << 8)
@@ -66,7 +66,7 @@ public class LegacyRichReader implements RichReader {
     }
 
     @SuppressWarnings("PointlessBitwiseExpression")
-    public long readLong() {
+    public long readLongLE() {
         // @formatter:off
         return ((switcher.get().readByte() & 0xFFL) << 0)
              + ((switcher.get().readByte() & 0xFFL) << 8)
@@ -89,7 +89,7 @@ public class LegacyRichReader implements RichReader {
         return data;
     }
 
-    public String readUTF8StringBinary() {
+    public String readUTF8Binary() {
         byte[] data = new byte[(int) readVarInt()];
         return switcher.get().readBytes(data) > 0 ? new String(data, StandardCharsets.UTF_8) : "";
     }
@@ -111,7 +111,7 @@ public class LegacyRichReader implements RichReader {
     }
 
     @SuppressWarnings("PointlessBitwiseExpression")
-    public float readFloat() {
+    public float readFloatLE() {
         // @formatter:off
         return Float.intBitsToFloat(
                 ((switcher.get().readByte() & 0xFF) << 0)
@@ -122,7 +122,7 @@ public class LegacyRichReader implements RichReader {
     }
 
     @SuppressWarnings("PointlessBitwiseExpression")
-    public double readDouble() {
+    public double readDoubleLE() {
         // @formatter:off
         return Double.longBitsToDouble(
                 ((switcher.get().readByte() & 0xFFL) << 0 )

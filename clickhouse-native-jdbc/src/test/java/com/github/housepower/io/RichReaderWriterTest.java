@@ -39,17 +39,15 @@ class RichReaderWriterTest implements ByteBufHelper {
     void testByte(byte value) throws Exception {
         testSerde(value,
                 RichWriter::writeByte, RichReader::readByte,
-                ((CheckedBiConsumer<ByteBuf, Byte>) ByteBuf::writeByte),
-                byteBuf -> Short.valueOf(byteBuf.readUnsignedByte()).byteValue());
+                ((CheckedBiConsumer<ByteBuf, Byte>) ByteBuf::writeByte), ByteBuf::readByte);
     }
 
     @ParameterizedTest
     @ValueSource(shorts = {0, 1, Short.MIN_VALUE, Short.MAX_VALUE})
     void testShort(short value) throws Exception {
         testSerde(value,
-                RichWriter::writeShort, RichReader::readShort,
-                ((CheckedBiConsumer<ByteBuf, Short>) ByteBuf::writeShortLE),
-                byteBuf -> Integer.valueOf(byteBuf.readUnsignedShortLE()).shortValue());
+                RichWriter::writeShortLE, RichReader::readShortLE,
+                ((CheckedBiConsumer<ByteBuf, Short>) ByteBuf::writeShortLE), ByteBuf::readShortLE);
     }
 
 
@@ -57,16 +55,15 @@ class RichReaderWriterTest implements ByteBufHelper {
     @ValueSource(ints = {0, 1, Integer.MIN_VALUE, Integer.MAX_VALUE})
     void testInt(int value) throws Exception {
         testSerde(value,
-                RichWriter::writeInt, RichReader::readInt,
-                ByteBuf::writeIntLE,
-                byteBuf -> Long.valueOf(byteBuf.readUnsignedIntLE()).intValue());
+                RichWriter::writeIntLE, RichReader::readIntLE,
+                ByteBuf::writeIntLE, ByteBuf::readIntLE);
     }
 
     @ParameterizedTest
     @ValueSource(longs = {0L, 1L, Long.MIN_VALUE, Long.MAX_VALUE})
     void testLong(long value) throws Exception {
         testSerde(value,
-                RichWriter::writeLong, RichReader::readLong,
+                RichWriter::writeLongLE, RichReader::readLongLE,
                 ByteBuf::writeLongLE, ByteBuf::readLongLE);
     }
 
@@ -74,7 +71,7 @@ class RichReaderWriterTest implements ByteBufHelper {
     @ValueSource(floats = {0.0F, 1.1F, Float.MIN_VALUE, Float.MAX_VALUE, Float.NaN, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY})
     void testFloat(float value) throws Exception {
         testSerde(value,
-                RichWriter::writeFloat, RichReader::readFloat,
+                RichWriter::writeFloatLE, RichReader::readFloatLE,
                 ByteBuf::writeFloatLE, ByteBuf::readFloatLE);
     }
 
@@ -82,7 +79,7 @@ class RichReaderWriterTest implements ByteBufHelper {
     @ValueSource(doubles = {0.0, 1.1, Double.MIN_VALUE, Double.MAX_VALUE, Double.NaN, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY})
     void testDouble(double value) throws Exception {
         testSerde(value,
-                RichWriter::writeDouble, RichReader::readDouble,
+                RichWriter::writeDoubleLE, RichReader::readDoubleLE,
                 ByteBuf::writeDoubleLE, ByteBuf::readDoubleLE);
     }
 
@@ -98,7 +95,7 @@ class RichReaderWriterTest implements ByteBufHelper {
     @ValueSource(strings = {"", "abc", "哈哈", "😝"})
     void testUTF8Binary(String value) throws Exception {
         testSerde(value,
-                RichWriter::writeUTF8StringBinary, RichReader::readUTF8StringBinary,
+                RichWriter::writeUTF8Binary, RichReader::readUTF8Binary,
                 this::writeUTF8Binary, this::readUTF8Binary);
     }
 

@@ -14,32 +14,27 @@
 
 package com.github.housepower.io;
 
-// TODO refactor to match ByteBuf
 public interface RichReader {
-
-    long readVarInt();
-
-    short readShort();
-
-    int readInt();
-
-    long readLong();
 
     boolean readBoolean();
 
-    byte[] readBytesBinary();
-
-    String readUTF8StringBinary();
-
     byte readByte();
 
-    void maybeEnableCompressed();
+    long readVarInt();
 
-    void maybeDisableCompressed();
+    short readShortLE();
 
-    float readFloat();
+    int readIntLE();
 
-    double readDouble();
+    long readLongLE();
+
+    float readFloatLE();
+
+    double readDoubleLE();
 
     byte[] readBytes(int size);
+
+    byte[] readBytesBinary();
+
+    String readUTF8Binary();
 }

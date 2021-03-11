@@ -23,7 +23,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 @Deprecated
-public class LegacyRichWriter implements RichWriter {
+public class LegacyRichWriter implements RichWriter, SupportCompress {
 
     private final Switcher<BinaryWriter> switcher;
     private final boolean enableCompress;
@@ -63,7 +63,7 @@ public class LegacyRichWriter implements RichWriter {
     }
 
     @SuppressWarnings("PointlessBitwiseExpression")
-    public void writeShort(short i) {
+    public void writeShortLE(short i) {
         // @formatter:off
         switcher.get().writeByte((byte) ((i >> 0) & 0xFF));
         switcher.get().writeByte((byte) ((i >> 8) & 0xFF));
@@ -71,7 +71,7 @@ public class LegacyRichWriter implements RichWriter {
     }
 
     @SuppressWarnings("PointlessBitwiseExpression")
-    public void writeInt(int i) {
+    public void writeIntLE(int i) {
         // @formatter:off
         switcher.get().writeByte((byte) ((i >> 0)  & 0xFF));
         switcher.get().writeByte((byte) ((i >> 8)  & 0xFF));
@@ -81,7 +81,7 @@ public class LegacyRichWriter implements RichWriter {
     }
 
     @SuppressWarnings("PointlessBitwiseExpression")
-    public void writeLong(long i) {
+    public void writeLongLE(long i) {
         // @formatter:off
         switcher.get().writeByte((byte) ((i >> 0)  & 0xFF));
         switcher.get().writeByte((byte) ((i >> 8)  & 0xFF));
@@ -94,7 +94,7 @@ public class LegacyRichWriter implements RichWriter {
         // @formatter:on
     }
 
-    public void writeUTF8StringBinary(String utf8) {
+    public void writeUTF8Binary(String utf8) {
         writeStringBinary(utf8, StandardCharsets.UTF_8);
     }
 
@@ -108,7 +108,7 @@ public class LegacyRichWriter implements RichWriter {
         switcher.get().writeBytes(bs);
     }
 
-    public void flushToTarget(boolean force) {
+    public void flush(boolean force) {
         switcher.get().flushToTarget(force);
     }
 
@@ -125,13 +125,13 @@ public class LegacyRichWriter implements RichWriter {
         }
     }
 
-    public void writeFloat(float datum) {
+    public void writeFloatLE(float datum) {
         int x = Float.floatToIntBits(datum);
-        writeInt(x);
+        writeIntLE(x);
     }
 
     @SuppressWarnings("PointlessBitwiseExpression")
-    public void writeDouble(double datum) {
+    public void writeDoubleLE(double datum) {
         long x = Double.doubleToLongBits(datum);
         // @formatter:off
         switcher.get().writeByte((byte) ((x >>> 0)  & 0xFF));

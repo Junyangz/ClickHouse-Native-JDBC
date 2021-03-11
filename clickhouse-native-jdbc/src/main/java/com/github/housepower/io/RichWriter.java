@@ -16,36 +16,31 @@ package com.github.housepower.io;
 
 import java.nio.charset.Charset;
 
-// TODO refactor to match ByteBuf
 public interface RichWriter {
 
-    void writeVarInt(long x);
+    void writeBoolean(boolean b);
 
-    void writeByte(byte x);
+    void writeByte(byte b);
 
-    void writeBoolean(boolean x);
+    void writeShortLE(short s);
 
-    void writeShort(short i);
+    void writeIntLE(int i);
 
-    void writeInt(int i);
+    void writeLongLE(long l);
 
-    void writeLong(long i);
+    void writeVarInt(long v);
 
-    void writeUTF8StringBinary(String utf8);
+    void writeFloatLE(float f);
 
-    void writeStringBinary(String data, Charset charset);
-
-    void writeBytesBinary(byte[] bs);
-
-    void flushToTarget(boolean force);
-
-    void maybeEnableCompressed();
-
-    void maybeDisableCompressed();
-
-    void writeFloat(float datum);
-
-    void writeDouble(double datum);
+    void writeDoubleLE(double d);
 
     void writeBytes(byte[] bytes);
+
+    void writeUTF8Binary(String utf8);
+
+    void writeStringBinary(String seq, Charset charset);
+
+    void writeBytesBinary(byte[] bytes);
+
+    void flush(boolean force);
 }
